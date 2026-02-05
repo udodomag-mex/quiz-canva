@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz CANVA - Tarjetas Didácticas Interactivas</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            min-height: 100vh;
+            color: #ffffff;
+        }
+
+        #root {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            color: #1a1a1a;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #028090 0%, #02c39a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .input-group {
+            margin-bottom: 32px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 12px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s ease;
+            background: #ffffff;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #028090;
+            box-shadow: 0 0 0 4px rgba(2, 128, 144, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px 32px;
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #028090 0%, #02c39a 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(2, 128, 144, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(2, 128, 144, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            margin-top: 16px;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .progress-info {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .student-name {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .question-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: #028090;
+        }
+
+        .timer {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #fef3c7;
+            padding: 12px 20px;
+            border-radius: 12px;
+        }
+
+        .timer-icon {
+            font-size: 24px;
+        }
+
+        .timer-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #d97706;
+            font-family: 'Space Mono', monospace;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .timer.urgent {
+            background: #fee2e2;
+            animation: pulse 1s infinite;
+        }
+
+        .timer.urgent .timer-value {
+            color: #dc2626;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .question-card {
+            background: #f8fafc;
+            padding: 32px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            border-left: 6px solid #028090;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: #028090;
+            color: white;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .question-text {
+            font-size: 20px;
+            line-height: 1.6;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .option-card {
+            background: white;
+            border: 3px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .option-card:hover {
+            border-color: #028090;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(2, 128, 144, 0.15);
+        }
+
+        .option-card.selected {
+            border-color: #028090;
+            background: linear-gradient(135deg, rgba(2, 128, 144, 0.1) 0%, rgba(2, 195, 154, 0.1) 100%);
+        }
+
+        .option-letter {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #028090 0%, #02c39a 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .option-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .results-card {
+            text-align: center;
+            animation: scaleIn 0.6s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .results-icon {
+            font-size: 80px;
+            margin-bottom: 24px;
+        }
+
+        .results-title {
+            font-size: 42px;
+            font-weight: 800;
+            color: #028090;
+            margin-bottom: 16px;
+        }
+
+        .results-score {
+            font-size: 72px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #028090 0%, #02c39a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .results-message {
+            font-size: 20px;
+            color: #64748b;
+            margin-bottom: 32px;
+        }
+
+        .results-details {
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+
+        .results-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .results-row:last-child {
+            border-bottom: none;
+        }
+
+        .results-label {
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .results-value {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .teacher-panel {
+            margin-top: 48px;
+            padding-top: 48px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .teacher-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .teacher-icon {
+            font-size: 32px;
+        }
+
+        .teacher-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #028090;
+        }
+
+        .password-form {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .password-form input {
+            flex: 1;
+        }
+
+        .password-form button {
+            width: auto;
+            padding: 16px 32px;
+        }
+
+        .results-table {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            margin-bottom: 16px;
+        }
+
+        .results-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table th {
+            background: #028090;
+            color: white;
+            padding: 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .results-table td {
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #1e293b;
+        }
+
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .results-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .score-excellent {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .score-good {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .score-fair {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .score-poor {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #028090;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-online {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-offline {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                padding: 24px;
+            }
+
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quiz-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .results-score {
+                font-size: 56px;
+            }
+
+            .results-table {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Datos de las preguntas
+        const questions = [
+            {
+                id: 1,
+                category: "Menú Principal",
+                question: "Este botón permite crear un diseño, al presionarlo nos muestra las diferentes opciones de diseño como son documentos, presentaciones, infografías, videos, flyer, post e historias para Instagram, incluso da la opción de elegir tamaño.",
+                options: ["Inicio", "Crear", "Plantillas", "Apps"],
+                correct: "Crear"
+            },
+            {
+                id: 2,
+                category: "Menú Principal",
+                question: "Esta sección muestra un cuadro de búsqueda que permite hacer una búsqueda entre millones de plantillas, donde podrás seleccionar la que más te guste. También nos muestra las plantillas de los diseños recientes.",
+                options: ["Crear", "Inicio", "Proyectos", "Marca"],
+                correct: "Inicio"
+            },
+            {
+                id: 3,
+                category: "Menú Principal",
+                question: "En esta sección, puedes acceder a las tareas que tus maestros han revisado, aquellas que requieren cambios según lo soliciten tus maestros y las tareas que tus maestros han aprobado.",
+                options: ["Proyectos", "Tareas", "Plantillas", "Inicio"],
+                correct: "Tareas"
+            },
+            {
+                id: 4,
+                category: "Menú Principal",
+                question: "En esta sección se permite organizar y gestionar los diseños de manera eficiente. Facilita la organización de elementos en subcarpetas temáticas, lo que te ayuda a evitar la búsqueda entre cientos de diseños.",
+                options: ["Tareas", "Plantillas", "Proyectos", "Apps"],
+                correct: "Proyectos"
+            },
+            {
+                id: 5,
+                category: "Menú Principal",
+                question: "En esta sección puedes acceder a múltiples plantillas prediseñadas, agrupadas en diferentes categorías (plantillas, fotos, elementos, gráficos, creators y contenido favorito).",
+                options: ["Inicio", "Proyectos", "Marca", "Plantillas"],
+                correct: "Plantillas"
+            },
+            {
+                id: 6,
+                category: "Menú Principal",
+                question: "En este botón se muestran todos los elementos visuales necesarios para mantener coherencia de la identidad visual de una marca.",
+                options: ["Apps", "Marca", "Plantillas", "Crear"],
+                correct: "Marca"
+            },
+            {
+                id: 7,
+                category: "Menú Principal",
+                question: "Esta sección permite acceder a diversas herramientas y funciones que facilitan la creación de anuncios, banner y otros elementos gráficos.",
+                options: ["Marca", "Elementos", "Apps", "Proyectos"],
+                correct: "Apps"
+            },
+            {
+                id: 8,
+                category: "Menú Lateral",
+                question: "Te permite encontrar y agregar elementos de diseño como gráficos, fotos, videos, audio, formas, líneas, marcos, tablas, gráficos y más a tu diseño.",
+                options: ["Texto", "Elementos", "Subidas", "Plantillas"],
+                correct: "Elementos"
+            },
+            {
+                id: 9,
+                category: "Menú Lateral",
+                question: "Puedes agregar títulos, subtítulos o texto de cuerpo, además de elegir combinaciones de fuentes prediseñadas. Al seleccionar un cuadro de texto, verás opciones de formato en la barra superior para cambiar fuente, tamaño, color, alineación, efectos y más.",
+                options: ["Elementos", "Subidas", "Texto", "Crear"],
+                correct: "Texto"
+            },
+            {
+                id: 10,
+                category: "Menú Lateral",
+                question: "Desde ahí puedes subir archivos como imágenes, videos, audio y documentos para usarlos en tus diseños. Solo haz clic en Subidas y luego en Subir archivos para elegir los archivos de tu computadora. También puedes arrastrar y soltar archivos directamente en esa sección.",
+                options: ["Texto", "Apps", "Elementos", "Subidas"],
+                correct: "Subidas"
+            }
+        ];
+
+        const TEACHER_PASSWORD = "profe2024";
+        const TIME_PER_QUESTION = 45; // segundos por pregunta
+
+        // Función para verificar si window.storage está disponible
+        const isStorageAvailable = () => {
+            return typeof window !== 'undefined' && window.storage;
+        };
+
+        function App() {
+            const [screen, setScreen] = useState('welcome');
+            const [studentName, setStudentName] = useState('');
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [answers, setAnswers] = useState([]);
+            const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
+            const [teacherPassword, setTeacherPassword] = useState('');
+            const [showTeacherPanel, setShowTeacherPanel] = useState(false);
+            const [teacherError, setTeacherError] = useState('');
+            const [allResults, setAllResults] = useState([]);
+            const [loading, setLoading] = useState(false);
+            const [saveStatus, setSaveStatus] = useState('');
+            const [storageAvailable, setStorageAvailable] = useState(true);
+            const timerRef = useRef(null);
+
+            // Verificar disponibilidad de storage al montar
+            useEffect(() => {
+                setStorageAvailable(isStorageAvailable());
+            }, []);
+
+            // Temporizador
+            useEffect(() => {
+                if (screen === 'quiz') {
+                    timerRef.current = setInterval(() => {
+                        setTimeLeft(prev => {
+                            if (prev <= 1) {
+                                handleNextQuestion();
+                                return TIME_PER_QUESTION;
+                            }
+                            return prev - 1;
+                        });
+                    }, 1000);
+
+                    return () => clearInterval(timerRef.current);
+                }
+            }, [screen, currentQuestion]);
+
+            // Guardar resultado en base de datos centralizada
+            const saveResultToDatabase = async (result) => {
+                if (!isStorageAvailable()) {
+                    console.error('Storage no disponible');
+                    return false;
+                }
+
+                try {
+                    setLoading(true);
+                    setSaveStatus('Guardando resultado...');
+
+                    // Generar ID único para el estudiante basado en nombre y timestamp
+                    const studentId = `student_${result.studentName.replace(/\s+/g, '_').toLowerCase()}_${Date.now()}`;
+                    
+                    // Guardar el resultado individual del estudiante
+                    await window.storage.set(studentId, JSON.stringify(result), true);
+
+                    // Actualizar lista de IDs de estudiantes
+                    let studentsList;
+                    try {
+                        const studentsData = await window.storage.get('quiz_students_list', true);
+                        studentsList = studentsData ? JSON.parse(studentsData.value) : [];
+                    } catch (error) {
+                        studentsList = [];
+                    }
+                    
+                    studentsList.push(studentId);
+                    await window.storage.set('quiz_students_list', JSON.stringify(studentsList), true);
+
+                    setSaveStatus('✓ Resultado guardado correctamente');
+                    setLoading(false);
+                    return true;
+                } catch (error) {
+                    console.error('Error guardando resultado:', error);
+                    setSaveStatus('✗ Error al guardar resultado');
+                    setLoading(false);
+                    return false;
+                }
+            };
+
+            // Cargar todos los resultados (para el profesor)
+            const loadAllResults = async () => {
+                if (!isStorageAvailable()) {
+                    setTeacherError('Sistema de almacenamiento no disponible');
+                    return;
+                }
+
+                try {
+                    setLoading(true);
+                    
+                    // Obtener lista de IDs de estudiantes
+                    const studentsData = await window.storage.get('quiz_students_list', true);
+                    
+                    if (!studentsData || !studentsData.value) {
+                        setAllResults([]);
+                        setLoading(false);
+                        return;
+                    }
+
+                    const studentIds = JSON.parse(studentsData.value);
+                    const results = [];
+
+                    // Cargar cada resultado individual
+                    for (const studentId of studentIds) {
+                        try {
+                            const resultData = await window.storage.get(studentId, true);
+                            if (resultData && resultData.value) {
+                                results.push(JSON.parse(resultData.value));
+                            }
+                        } catch (error) {
+                            console.error(`Error cargando resultado ${studentId}:`, error);
+                        }
+                    }
+
+                    // Ordenar por fecha (más recientes primero)
+                    results.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    setAllResults(results);
+                    setLoading(false);
+                } catch (error) {
+                    console.error('Error cargando resultados:', error);
+                    setTeacherError('Error al cargar los resultados');
+                    setLoading(false);
+                }
+            };
+
+            // Borrar todos los resultados
+            const clearAllResults = async () => {
+                if (!window.confirm('¿Estás seguro de que quieres borrar TODOS los resultados? Esta acción no se puede deshacer.')) {
+                    return;
+                }
+
+                try {
+                    setLoading(true);
+                    
+                    // Obtener lista de IDs
+                    const studentsData = await window.storage.get('quiz_students_list', true);
+                    
+                    if (studentsData && studentsData.value) {
+                        const studentIds = JSON.parse(studentsData.value);
+                        
+                        // Borrar cada resultado individual
+                        for (const studentId of studentIds) {
+                            try {
+                                await window.storage.delete(studentId, true);
+                            } catch (error) {
+                                console.error(`Error borrando ${studentId}:`, error);
+                            }
+                        }
+                    }
+
+                    // Borrar la lista de IDs
+                    await window.storage.delete('quiz_students_list', true);
+                    
+                    setAllResults([]);
+                    setLoading(false);
+                    alert('Todos los resultados han sido borrados');
+                } catch (error) {
+                    console.error('Error borrando resultados:', error);
+                    alert('Error al borrar los resultados');
+                    setLoading(false);
+                }
+            };
+
+            const startQuiz = () => {
+                if (studentName.trim()) {
+                    setScreen('quiz');
+                    setTimeLeft(TIME_PER_QUESTION);
+                }
+            };
+
+            const handleNextQuestion = () => {
+                const newAnswer = {
+                    questionId: questions[currentQuestion].id,
+                    question: questions[currentQuestion].question,
+                    category: questions[currentQuestion].category,
+                    selected: selectedAnswer,
+                    correct: questions[currentQuestion].correct,
+                    isCorrect: selectedAnswer === questions[currentQuestion].correct,
+                    timeUsed: TIME_PER_QUESTION - timeLeft
+                };
+
+                const newAnswers = [...answers, newAnswer];
+                setAnswers(newAnswers);
+
+                if (currentQuestion < questions.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                    setSelectedAnswer(null);
+                    setTimeLeft(TIME_PER_QUESTION);
+                } else {
+                    finishQuiz(newAnswers);
+                }
+            };
+
+            const finishQuiz = async (finalAnswers) => {
+                clearInterval(timerRef.current);
+                
+                const newResult = {
+                    studentName,
+                    date: new Date().toISOString(),
+                    answers: finalAnswers,
+                    score: finalAnswers.filter(a => a.isCorrect).length,
+                    total: questions.length,
+                    percentage: Math.round((finalAnswers.filter(a => a.isCorrect).length / questions.length) * 100)
+                };
+
+                // Guardar en base de datos centralizada
+                await saveResultToDatabase(newResult);
+                
+                setScreen('results');
+            };
+
+            const handleTeacherLogin = async () => {
+                if (teacherPassword === TEACHER_PASSWORD) {
+                    setShowTeacherPanel(true);
+                    setTeacherError('');
+                    await loadAllResults();
+                } else {
+                    setTeacherError('Contraseña incorrecta');
+                    setTeacherPassword('');
+                }
+            };
+
+            const getScoreClass = (percentage) => {
+                if (percentage >= 90) return 'score-excellent';
+                if (percentage >= 70) return 'score-good';
+                if (percentage >= 50) return 'score-fair';
+                return 'score-poor';
+            };
+
+            const getScoreMessage = (percentage) => {
+                if (percentage >= 90) return '¡Excelente trabajo! Dominas CANVA.';
+                if (percentage >= 70) return '¡Bien hecho! Tienes buen conocimiento.';
+                if (percentage >= 50) return 'Buen intento. Sigue practicando.';
+                return 'Necesitas repasar más el contenido.';
+            };
+
+            const currentScore = answers.filter(a => a.isCorrect).length;
+            const currentPercentage = Math.round((currentScore / questions.length) * 100);
+
+            // PANTALLA DE BIENVENIDA
+            if (screen === 'welcome') {
+                return (
+                    <div className="container">
+                        <div className="card">
+                            <div className="header">
+                                <h1>Quiz Interactivo CANVA</h1>
+                                <p>Demuestra tu conocimiento sobre los elementos del menú de CANVA</p>
+                            </div>
+
+                            {!storageAvailable && (
+                                <div className="error-message">
+                                    ⚠️ Sistema de almacenamiento no disponible. Los resultados no se guardarán.
+                                </div>
+                            )}
+
+                            {storageAvailable && (
+                                <div className="success-message" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                    <span className="status-badge status-online">● Online</span>
+                                    Base de datos centralizada activa
+                                </div>
+                            )}
+
+                            <div className="input-group">
+                                <label htmlFor="studentName">
+                                    📝 Ingresa tu nombre completo:
+                                </label>
+                                <input
+                                    id="studentName"
+                                    type="text"
+                                    placeholder="Ejemplo: Juan Pérez García"
+                                    value={studentName}
+                                    onChange={(e) => setStudentName(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && startQuiz()}
+                                />
+                            </div>
+
+                            <button 
+                                className="btn btn-primary" 
+                                onClick={startQuiz}
+                                disabled={!studentName.trim()}
+                            >
+                                Comenzar Quiz
+                            </button>
+
+                            <div style={{marginTop: '32px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
+                                <p>📌 10 preguntas | ⏱️ 45 segundos por pregunta</p>
+                                <p style={{marginTop: '8px'}}>🎯 Las respuestas se guardarán en la base de datos centralizada</p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // PANTALLA DEL QUIZ
+            if (screen === 'quiz') {
+                const question = questions[currentQuestion];
+                const letters = ['A', 'B', 'C', 'D'];
+
+                return (
+                    <div className="container">
+                        <div className="card">
+                            <div className="quiz-header">
+                                <div className="progress-info">
+                                    <div className="student-name">
+                                        👤 {studentName}
+                                    </div>
+                                    <div className="question-number">
+                                        Pregunta {currentQuestion + 1} de {questions.length}
+                                    </div>
+                                </div>
+                                <div className={`timer ${timeLeft <= 10 ? 'urgent' : ''}`}>
+                                    <div className="timer-icon">⏱️</div>
+                                    <div className="timer-value">{timeLeft}s</div>
+                                </div>
+                            </div>
+
+                            <div className="question-card">
+                                <div className="category-badge">{question.category}</div>
+                                <div className="question-text">{question.question}</div>
+                            </div>
+
+                            <div className="options-grid">
+                                {question.options.map((option, index) => (
+                                    <div
+                                        key={index}
+                                        className={`option-card ${selectedAnswer === option ? 'selected' : ''}`}
+                                        onClick={() => setSelectedAnswer(option)}
+                                    >
+                                        <div className="option-letter">{letters[index]}</div>
+                                        <div className="option-text">{option}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleNextQuestion}
+                                disabled={!selectedAnswer}
+                            >
+                                {currentQuestion < questions.length - 1 ? 'Siguiente Pregunta' : 'Finalizar Quiz'}
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // PANTALLA DE RESULTADOS
+            if (screen === 'results') {
+                return (
+                    <div className="container">
+                        <div className="card">
+                            <div className="results-card">
+                                <div className="results-icon">
+                                    {currentPercentage >= 70 ? '🎉' : '📚'}
+                                </div>
+                                <div className="results-title">¡Quiz Completado!</div>
+                                <div className="results-score">
+                                    {currentScore}/{questions.length}
+                                </div>
+                                <div className="results-message">
+                                    {getScoreMessage(currentPercentage)}
+                                </div>
+
+                                {saveStatus && (
+                                    <div className={saveStatus.includes('✓') ? 'success-message' : 'error-message'}>
+                                        {saveStatus}
+                                    </div>
+                                )}
+
+                                <div className="results-details">
+                                    <div className="results-row">
+                                        <span className="results-label">Estudiante:</span>
+                                        <span className="results-value">{studentName}</span>
+                                    </div>
+                                    <div className="results-row">
+                                        <span className="results-label">Puntuación:</span>
+                                        <span className="results-value">
+                                            <span className={`score-badge ${getScoreClass(currentPercentage)}`}>
+                                                {currentPercentage}%
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div className="results-row">
+                                        <span className="results-label">Respuestas correctas:</span>
+                                        <span className="results-value">{currentScore} de {questions.length}</span>
+                                    </div>
+                                    <div className="results-row">
+                                        <span className="results-label">Respuestas incorrectas:</span>
+                                        <span className="results-value">{questions.length - currentScore}</span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => window.location.reload()}
+                                >
+                                    Realizar Otro Quiz
+                                </button>
+                            </div>
+
+                            {/* Panel del Profesor */}
+                            <div className="teacher-panel">
+                                <div className="teacher-header">
+                                    <div className="teacher-icon">👨‍🏫</div>
+                                    <div className="teacher-title">Panel del Profesor</div>
+                                </div>
+
+                                {!showTeacherPanel ? (
+                                    <>
+                                        {teacherError && (
+                                            <div className="error-message">{teacherError}</div>
+                                        )}
+                                        <div className="password-form">
+                                            <input
+                                                type="password"
+                                                placeholder="Ingresa la contraseña del profesor"
+                                                value={teacherPassword}
+                                                onChange={(e) => setTeacherPassword(e.target.value)}
+                                                onKeyPress={(e) => e.key === 'Enter' && handleTeacherLogin()}
+                                            />
+                                            <button
+                                                className="btn btn-secondary"
+                                                onClick={handleTeacherLogin}
+                                                disabled={loading}
+                                            >
+                                                {loading ? <span className="loading-spinner"></span> : 'Acceder'}
+                                            </button>
+                                        </div>
+                                        <p style={{fontSize: '13px', color: '#64748b', textAlign: 'center'}}>
+                                            Solo el profesor puede ver los resultados centralizados de todos los estudiantes
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="success-message" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                            <span>✓ Acceso autorizado. Mostrando {allResults.length} resultados.</span>
+                                            <button 
+                                                className="btn btn-secondary" 
+                                                onClick={loadAllResults}
+                                                disabled={loading}
+                                                style={{width: 'auto', padding: '8px 16px', fontSize: '14px', margin: 0}}
+                                            >
+                                                {loading ? <span className="loading-spinner"></span> : '🔄 Actualizar'}
+                                            </button>
+                                        </div>
+                                        {loading ? (
+                                            <div style={{textAlign: 'center', padding: '32px'}}>
+                                                <span className="loading-spinner"></span>
+                                                <p style={{marginTop: '16px', color: '#64748b'}}>Cargando resultados...</p>
+                                            </div>
+                                        ) : allResults.length > 0 ? (
+                                            <>
+                                                <div className="results-table">
+                                                    <table>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>Estudiante</th>
+                                                                <th>Fecha</th>
+                                                                <th>Puntuación</th>
+                                                                <th>Porcentaje</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {allResults.map((result, index) => (
+                                                                <tr key={index}>
+                                                                    <td>{index + 1}</td>
+                                                                    <td>{result.studentName}</td>
+                                                                    <td>{new Date(result.date).toLocaleString('es-MX')}</td>
+                                                                    <td>{result.score} / {result.total}</td>
+                                                                    <td>
+                                                                        <span className={`score-badge ${getScoreClass(result.percentage)}`}>
+                                                                            {result.percentage}%
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <button
+                                                    className="btn btn-danger"
+                                                    onClick={clearAllResults}
+                                                    disabled={loading}
+                                                >
+                                                    🗑️ Borrar Todos los Resultados
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <p style={{textAlign: 'center', color: '#64748b', padding: '32px'}}>
+                                                No hay resultados registrados en la base de datos centralizada.
+                                            </p>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
